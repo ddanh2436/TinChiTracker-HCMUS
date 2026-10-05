@@ -37,8 +37,7 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+:root[data-theme="dark"] {
     --bg: #0A1413;
     --card: #101D1C;
     --fg: #E4F1EF;
@@ -64,13 +63,13 @@
     --shadow: 0 1px 2px rgba(0, 0, 0, .3);
     --shadow-lg: 0 12px 32px -12px rgba(0, 0, 0, .6);
     color-scheme: dark;
-  }
 }
 
 /* ---------- Base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 84px; -webkit-text-size-adjust: 100%; }
 body {
+  transition: background-color .25s var(--ease), color .25s var(--ease);
   margin: 0;
   font-family: var(--font);
   font-size: 15px;
@@ -117,6 +116,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .select-wrap select:hover { border-color: var(--primary); }
 .select-chevron { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--muted-fg); }
 
+.select-sm select { height: 44px; min-width: 150px; }
 .icon-btn {
   display: grid; place-items: center; width: 42px; height: 42px;
   border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--card);
@@ -230,7 +230,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .segmented button[aria-checked="true"] { background: var(--card); color: var(--fg); box-shadow: var(--shadow); }
 
 /* ---------- Blocks & groups ---------- */
-.block { margin-top: 26px; }
+.block { margin-top: 26px; content-visibility: auto; contain-intrinsic-size: auto 900px; }
 .block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 2px 12px; }
 .block-head h2 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
 .block-progress { font-size: 14px; color: var(--muted-fg); font-variant-numeric: tabular-nums; }
@@ -338,7 +338,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
   transition: filter .2s var(--ease);
 }
 .btn-primary:hover { filter: brightness(1.08); }
-@media (prefers-color-scheme: dark) { .btn-primary { color: var(--on-primary); background: var(--primary); } }
+[data-theme="dark"] .btn-primary { color: var(--on-primary); background: var(--primary); }
 
 /* ---------- Footer & toast ---------- */
 .footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--muted-fg); text-align: center; }
@@ -365,6 +365,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
   .select-wrap select { width: 100%; min-width: 0; }
   .toolbar { position: static; flex-direction: column; align-items: stretch; }
   .segmented { width: 100%; }
+  .select-sm select { width: 100%; }
   .segmented button { flex: 1; }
   .hero { flex-direction: column; text-align: center; padding: 20px 16px; gap: 16px; }
   .hero-title { font-size: 19px; justify-content: center; }

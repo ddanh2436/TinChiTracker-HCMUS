@@ -3,12 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="light dark">
   <title>Tín Chỉ Tracker</title>
   <meta name="description" content="Theo dõi số tín chỉ cần thiết để tốt nghiệp — ngành CNTT, ĐH KHTN TP.HCM, Khóa 2024.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <script src="js/theme.js"></script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 10 12 5 2 10l10 5 10-5Z'/%3E%3Cpath d='M6 12v5c3 3 9 3 12 0v-5'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -29,11 +33,16 @@
           <select id="programSelect" aria-label="Chọn chuyên ngành"></select>
           <svg class="select-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
         </label>
+        <button class="icon-btn" id="themeBtn" aria-label="Đổi giao diện"></button>
         <div class="menu">
           <button class="icon-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-label="Tùy chọn dữ liệu">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
           </button>
           <div class="menu-panel" id="menuPanel" role="menu" hidden>
+            <button role="menuitem" data-action="share">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              Sao chép link tiến độ
+            </button>
             <button role="menuitem" data-action="export">
               <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
               Xuất dữ liệu (JSON)
@@ -60,7 +69,12 @@
     <div class="toolbar" role="search">
       <label class="search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="searchInput" type="search" placeholder="Tìm theo tên hoặc mã học phần…" autocomplete="off">
+        <input id="searchInput" type="search" placeholder="Tìm theo tên hoặc mã học phần…  (phím /)" aria-label="Tìm học phần" autocomplete="off">
+      </label>
+      <label class="select-wrap select-sm">
+        <span class="sr-only">Lọc theo học kỳ dự kiến</span>
+        <select id="hkSelect" aria-label="Lọc theo học kỳ dự kiến"></select>
+        <svg class="select-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
       </label>
       <div class="segmented" role="radiogroup" aria-label="Lọc học phần">
         <button role="radio" data-filter="all">Tất cả</button>
@@ -72,7 +86,7 @@
     <div id="content"></div>
 
     <footer class="footer">
-      Dữ liệu theo Chương trình đào tạo ban hành kèm QĐ 2693/QĐ-KHTN (30/09/2024). Tiến độ được lưu trên trình duyệt của bạn.
+      Dữ liệu theo Chương trình đào tạo ban hành kèm QĐ 2693/QĐ-KHTN (30/09/2024). Tiến độ chỉ lưu trên trình duyệt của bạn — dùng “Sao chép link tiến độ” để mở trên máy khác.
     </footer>
   </main>
 

@@ -3,7 +3,7 @@
  * (QĐ 2693/QĐ-KHTN ngày 30/09/2024, Trường ĐH Khoa học Tự nhiên, ĐHQG-HCM).
  *
  * Thêm ngành mới: khai báo một object trong PROGRAMS theo cùng cấu trúc với `ktpm`
- * rồi đặt `available: true`. Khối Đại cương + Cơ sở ngành dùng chung cho mọi ngành.
+ * (dùng makeProgram). Khối Đại cương + Cơ sở ngành dùng chung cho mọi ngành.
  */
 window.TCT_DATA = (() => {
   // ---------- Danh mục học phần: code -> [tên, số TC] ----------
@@ -278,34 +278,37 @@ window.TCT_DATA = (() => {
   );
 
   // ---------- Ngành ----------
-  const ktpmCore = ['CSC13003', 'CSC13005', 'CSC13006', 'CSC13007', 'CSC13008', 'CSC13009', 'CSC13010', 'CSC13106', 'CSC13112'];
-  const ktpmElective = ['CSC10121', 'CSC10102', 'CSC10103', 'CSC10105', 'CSC10107', 'CSC13001', 'CSC13101', 'CSC13102',
-    'CSC13103', 'CSC13107', 'CSC13117', 'CSC11007', 'CSC14005', 'CSC16106'];
-  const ktpmGradExtra = ['CSC13114', 'CSC13115', 'CSC13116', 'CSC13118'];
-  const ktpmGrad = ['CSC10251', 'CSC10252', 'CSC10204', ...ktpmGradExtra];
+  // Học phần chỉ thuộc mục 7.2.2.9.3 (tự chọn tự do riêng của ngành CNTT).
+  const CNTT_ONLY = ['CSC11114', 'CSC12112', 'CSC12113', 'CSC13119', 'CSC13120', 'CSC13121', 'CSC13122', 'CSC00008'];
 
-  const PROGRAMS = {
-    mmt: { name: 'Mạng máy tính và Viễn thông', available: false },
-    httt: { name: 'Hệ thống thông tin', available: false },
-    ktpm: {
-      name: 'Kỹ thuật phần mềm',
+  /**
+   * Mọi ngành có cùng khung: bắt buộc chuyên ngành (≥4 môn, ≥16 TC), tự chọn chuyên ngành (≥2 môn, ≥8 TC),
+   * tự chọn tự do (bù đủ 34 TC) và 3 phương án tốt nghiệp (10 TC).
+   *  - gradExtra: các học phần 4 TC đi kèm Thực tập dự án tốt nghiệp (phương án 3)
+   *  - gradIntoElective: học phần tốt nghiệp học dư được tính vào tự chọn chuyên ngành (vd. ngành MMT)
+   *  - noCnttFree: tự chọn tự do không gồm danh mục riêng của ngành CNTT (vd. ngành KHDL)
+   */
+  function makeProgram({ name, core, elective, gradExtra, plan, gradIntoElective = false, noCnttFree = false }) {
+    const grad = ['CSC10251', 'CSC10252', 'CSC10204', ...gradExtra];
+    const own = new Set([...core, ...elective, ...grad, ...(noCnttFree ? CNTT_ONLY : [])]);
+    return {
+      name,
       available: true,
       major: {
         title: 'Chuyên ngành',
         credits: 34,
-        core: {
-          title: 'Bắt buộc chuyên ngành', minCourses: 4, minCredits: 16,
-          courses: ktpmCore,
-        },
+        gradIntoElective,
+        core: { title: 'Bắt buộc chuyên ngành', minCourses: 4, minCredits: 16, courses: core },
         elective: {
-          title: 'Tự chọn chuyên ngành', minCourses: 2, minCredits: 8,
-          hint: 'Môn bắt buộc chuyên ngành học dư cũng được tính vào đây.',
-          courses: ktpmElective,
+          title: 'Tự chọn chuyên ngành', minCourses: 2, minCredits: 8, courses: elective,
+          hint: gradIntoElective
+            ? 'Môn bắt buộc chuyên ngành và học phần tốt nghiệp học dư cũng được tính vào đây.'
+            : 'Môn bắt buộc chuyên ngành học dư cũng được tính vào đây.',
         },
         free: {
           title: 'Tự chọn tự do',
           hint: 'Chọn từ học phần chuyên ngành / tốt nghiệp của các ngành khác. Phần dư của các nhóm trên cũng được tính vào đây.',
-          courses: ALL_MAJOR_COURSES.filter((c) => ![...ktpmCore, ...ktpmElective, ...ktpmGrad].includes(c)),
+          courses: ALL_MAJOR_COURSES.filter((c) => !own.has(c)),
         },
       },
       graduation: {
@@ -318,12 +321,40 @@ window.TCT_DATA = (() => {
             id: 'ttda', title: 'Phương án 3 · Thực tập dự án + 1 học phần tốt nghiệp',
             parts: [
               { credits: 6, courses: ['CSC10204'] },
-              { credits: 4, label: 'Chọn 1 học phần (4 TC)', courses: ktpmGradExtra },
+              { credits: 4, label: 'Chọn 1 học phần (4 TC)', courses: gradExtra },
             ],
           },
         ],
       },
-      // Kế hoạch giảng dạy dự kiến HK7–HK12 (mục 8.2.3)
+      plan, // Kế hoạch giảng dạy dự kiến HK7–HK12 (mục 8.2.x)
+    };
+  }
+
+  const PROGRAMS = {
+    // 7.2.2.1 · 7.2.3.1 · 8.2.1
+    mmt: makeProgram({
+      name: 'Mạng máy tính và Viễn thông',
+      core: ['CSC11002', 'CSC11003', 'CSC11004', 'CSC11006', 'CSC11007', 'CSC11115', 'CSC15001', 'CSC15005'],
+      elective: ['CSC10107', 'CSC11106', 'CSC11116', 'CSC11117', 'CSC11118', 'CSC11120', 'CSC14005', 'CSC15002', 'CSC15003'],
+      gradExtra: ['CSC11111', 'CSC11112', 'CSC11119', 'CSC15010'],
+      gradIntoElective: true,
+      plan: {
+        CSC13002: 7, CSC11004: 7, CSC15005: 7, CSC14005: 7, BAA00101: 7,
+        CSC11003: 8, CSC15002: 8, CSC11006: 8, CSC11007: 8, CSC15003: 8, CSC11115: 8, CSC11120: 8, BAA00102: 8,
+        CSC10103: 9, CSC10107: 9, CSC15001: 9, CSC11002: 9, CSC11116: 9, CSC11118: 9,
+        CSC10204: 10, CSC10251: 10, CSC10252: 10, CSC11112: 10, CSC15010: 10, CSC11117: 10, BAA00103: 10,
+        CSC11119: 11, CSC11106: 11, BAA00104: 11,
+        CSC11111: 12,
+      },
+    }),
+    httt: { name: 'Hệ thống thông tin', available: false },
+    // 7.2.2.3 · 7.2.3.3 · 8.2.3
+    ktpm: makeProgram({
+      name: 'Kỹ thuật phần mềm',
+      core: ['CSC13003', 'CSC13005', 'CSC13006', 'CSC13007', 'CSC13008', 'CSC13009', 'CSC13010', 'CSC13106', 'CSC13112'],
+      elective: ['CSC10121', 'CSC10102', 'CSC10103', 'CSC10105', 'CSC10107', 'CSC13001', 'CSC13101', 'CSC13102',
+        'CSC13103', 'CSC13107', 'CSC13117', 'CSC11007', 'CSC14005', 'CSC16106'],
+      gradExtra: ['CSC13114', 'CSC13115', 'CSC13116', 'CSC13118'],
       plan: {
         CSC13002: 7, CSC13008: 7, CSC13102: 7, BAA00101: 7,
         CSC13005: 8, CSC13009: 8, CSC13001: 8, CSC13010: 8, BAA00102: 8,
@@ -332,12 +363,43 @@ window.TCT_DATA = (() => {
         CSC13116: 11, CSC13118: 11, CSC13101: 11, BAA00104: 11,
         CSC13115: 12,
       },
-    },
-    khmt: { name: 'Khoa học máy tính', available: false },
+    }),
+    // 7.2.2.4 · 7.2.3.4 · 8.2.4
+    khmt: makeProgram({
+      name: 'Khoa học máy tính',
+      core: ['CSC14001', 'CSC14002', 'CSC14004', 'CSC14005', 'CSC14006', 'CSC14101', 'CSC14111', 'CSC14118', 'CSC14120',
+        'CSC15006', 'CSC16004', 'CSC18101', 'CSC18102', 'CSC18103', 'CSC18104'],
+      elective: ['CSC10102', 'CSC10103', 'CSC10104', 'CSC10108', 'CSC14008', 'CSC14105', 'CSC14112', 'CSC14113', 'CSC14117',
+        'CSC14119', 'CSC16005', 'CSC17001', 'CSC17103', 'CSC18001'],
+      gradExtra: ['CSC14114', 'CSC14115', 'CSC14116', 'CSC18105', 'CSC16107'],
+      plan: {
+        CSC13002: 7, CSC14004: 7, CSC14005: 7, BAA00101: 7,
+        CSC10108: 8, CSC14006: 8, CSC14008: 8, CSC14118: 8, CSC16005: 8, BAA00102: 8,
+        CSC10103: 9, CSC10107: 9, CSC14001: 9, CSC14111: 9,
+        CSC10204: 10, CSC10251: 10, CSC10252: 10, CSC14002: 10, CSC14120: 10, CSC14112: 10, CSC14117: 10, CSC17001: 10, BAA00103: 10,
+        CSC14114: 11, CSC14101: 11, CSC17103: 11, BAA00104: 11,
+        CSC14115: 12, CSC14116: 12,
+      },
+    }),
     cntt_tt: { name: 'Công nghệ tri thức', available: false },
     tgmt: { name: 'Thị giác máy tính', available: false },
     attt: { name: 'An toàn thông tin', available: false },
-    khdl: { name: 'Khoa học dữ liệu', available: false },
+    // 7.2.2.8 · 7.2.3.8 · 8.2.8
+    khdl: makeProgram({
+      name: 'Khoa học dữ liệu',
+      core: ['CSC10108', 'CSC14004', 'CSC14005', 'CSC14119', 'CSC17001', 'CSC17104'],
+      elective: ['CSC14117', 'CSC14118', 'CSC14120', 'CSC15004', 'CSC15007', 'CSC15102', 'CSC17102', 'CSC17103', 'CSC17106', 'CSC18001'],
+      gradExtra: ['CSC17107', 'CSC14115', 'CSC14116'],
+      noCnttFree: true,
+      plan: {
+        CSC13002: 7, CSC14119: 7, CSC17104: 7, BAA00101: 7,
+        CSC10108: 8, CSC14005: 8, CSC15007: 8, CSC14004: 8, BAA00102: 8,
+        CSC10103: 9, CSC10107: 9, CSC14118: 9, CSC17103: 9, CSC15004: 9,
+        CSC10204: 10, CSC10251: 10, CSC10252: 10, CSC17001: 10, CSC14117: 10, CSC14120: 10, BAA00103: 10,
+        CSC14115: 11, CSC17107: 11, BAA00104: 11,
+        CSC14116: 12,
+      },
+    }),
     cntt: { name: 'Công nghệ thông tin', available: false },
   };
 
